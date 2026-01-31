@@ -1,9 +1,10 @@
 # Bootstrap Corpus Specification
 
-**Version:** 0.2.0
+**Version:** 0.3.0
 **Status:** Active Development
 **PMAT Target:** A+ Grade (95%+ coverage, 80%+ mutation score)
 **Python Reference:** `hf-ground-truth-corpus` (14 modules, 7,800 lines API)
+**Current Coverage:** 97.42% (466 tests)
 
 ---
 
@@ -33,9 +34,9 @@ Full parity with `hf-ground-truth-corpus` 14 modules:
 | 4 | `hf_gtc.inference` | `inference` | ✅ Done | 3 | P0 |
 | 5 | `hf_gtc.evaluation` | `evaluation` | ✅ Done | 3 | P0 |
 | 6 | `hf_gtc.deployment` | `deployment` | ✅ Done | 3 | P0 |
-| 7 | `hf_gtc.hub` | `hub` | 🔲 Planned | 0 | P1 |
-| 8 | `hf_gtc.generation` | `generation` | 🔲 Planned | 0 | P1 |
-| 9 | `hf_gtc.rag` | `rag` | 🔲 Planned | 0 | P1 |
+| 7 | `hf_gtc.hub` | `hub` | ✅ Done | 4 | P1 |
+| 8 | `hf_gtc.generation` | `generation` | ✅ Done | 4 | P1 |
+| 9 | `hf_gtc.rag` | `rag` | ✅ Done | 4 | P1 |
 | 10 | `hf_gtc.agents` | `agents` | 🔲 Planned | 0 | P2 |
 | 11 | `hf_gtc.safety` | `safety` | 🔲 Planned | 0 | P2 |
 | 12 | `hf_gtc.audio` | `audio` | 🔲 Planned | 0 | P3 |
@@ -329,44 +330,99 @@ let quantized = quantizer.quantize(&weights);
 
 ---
 
-### 7-14. Planned Modules
-
-#### 7. Hub (`hf_gtc.hub` → `hub`) - P1
+### 7. Hub (`hf_gtc.hub` → `hub`) - ✅ IMPLEMENTED
 
 **Python Reference**: 11 files, 556 lines API
 
-| Python File | Rust Equivalent | Key Types |
-|-------------|-----------------|-----------|
-| `search.py` | `search.rs` | `ModelInfo`, `DatasetInfo`, search filters |
-| `model_cards.py` | `model_cards.rs` | Model card metadata |
-| `datasets.py` | `datasets.rs` | `DatasetConfig`, `DatasetMetadata` |
-| `versioning.py` | `versioning.rs` | `ModelVersion`, SHA-256 hashing |
-| `registry.py` | `registry.rs` | Registry integration (maps to pacha) |
+| Rust File | Status | Key Types |
+|-----------|--------|-----------|
+| `registry.rs` | ✅ | `ModelStage`, `VersioningScheme`, `RegistryConfig`, `ModelVersion`, `RegistryStats` |
+| `versioning.rs` | ✅ | `ChangeType`, `DiffType`, `VersionInfo`, `ModelDiff`, `VersionStats`, `parse_version()` |
+| `datasets.rs` | ✅ | `DatasetFormat`, `SplitType`, `StreamingMode`, `DatasetConfig`, `DatasetStats`, `DownloadConfig` |
+| `mod.rs` | ✅ | Module re-exports |
 
-#### 8. Generation (`hf_gtc.generation` → `generation`) - P1
+**Cross-Language Examples:**
+
+```python
+# Python (hf_gtc)
+from hf_gtc.hub import register_model, ModelStage, create_registry_config
+config = create_registry_config(name="my-model", namespace="org")
+```
+
+```rust
+// Rust (this corpus)
+use batuta_ground_truth_mlops_corpus::hub::{RegistryConfig, ModelStage, VersioningScheme};
+let config = RegistryConfig::new("my-model")
+    .namespace("org")
+    .versioning_scheme(VersioningScheme::Semantic);
+```
+
+---
+
+### 8. Generation (`hf_gtc.generation` → `generation`) - ✅ IMPLEMENTED
 
 **Python Reference**: 9 files, 495 lines API
 
-| Python File | Rust Equivalent | Key Types |
-|-------------|-----------------|-----------|
-| `prompting.py` | `prompting.rs` | Few-shot templates, CoT |
-| `chat.py` | `chat.rs` | Chat completion API |
-| `sampling.py` | `sampling.rs` | Temperature, top-k, top-p |
-| `constraints.py` | `constraints.rs` | Grammar constraints |
-| `structured.py` | `structured.rs` | JSON schema output |
-| `tools.py` | `tools.rs` | Function calling |
+| Rust File | Status | Key Types |
+|-----------|--------|-----------|
+| `sampling.rs` | ✅ | `SamplingStrategy`, `SamplingConfig`, `BeamSearchConfig`, `ContrastiveConfig`, `StoppingCriteria` |
+| `prompting.rs` | ✅ | `PromptFormat`, `FewShotStrategy`, `ReasoningType`, `FewShotExample`, `PromptTemplate` |
+| `chat.rs` | ✅ | `MessageRole`, `ChatTemplateFormat`, `ChatMessage`, `Conversation`, `TruncationStrategy`, `ChatStats` |
+| `mod.rs` | ✅ | Module re-exports |
 
-#### 9. RAG (`hf_gtc.rag` → `rag`) - P1
+**Cross-Language Examples:**
+
+```python
+# Python (hf_gtc)
+from hf_gtc.generation import SamplingConfig, SamplingStrategy
+config = create_sampling_config(temperature=0.7, top_p=0.9)
+```
+
+```rust
+// Rust (this corpus)
+use batuta_ground_truth_mlops_corpus::generation::{SamplingConfig, SamplingStrategy};
+let sampling = SamplingConfig::new()
+    .strategy(SamplingStrategy::TopP)
+    .temperature(0.7)
+    .top_p(0.9);
+```
+
+---
+
+### 9. RAG (`hf_gtc.rag` → `rag`) - ✅ IMPLEMENTED
 
 **Python Reference**: 8 files, 467 lines API
 
-| Python File | Rust Equivalent | Key Types |
-|-------------|-----------------|-----------|
-| `vectorstore.py` | `vectorstore.rs` | Vector DB integration (maps to trueno-db) |
-| `chunking.py` | `chunking.rs` | Semantic chunking (maps to trueno-rag) |
-| `retrieval.py` | `retrieval.rs` | BM25 + vector search |
-| `hybrid_search.py` | `hybrid.rs` | RRF fusion |
-| `reranking.py` | `reranking.rs` | Cross-encoder reranking |
+| Rust File | Status | Key Types |
+|-----------|--------|-----------|
+| `chunking.rs` | ✅ | `ChunkingStrategy`, `OverlapType`, `BoundaryDetection`, `ChunkConfig`, `Chunk`, `chunk_document()` |
+| `retrieval.rs` | ✅ | `RetrievalMethod`, `DistanceMetric`, `RagConfig`, `RetrievalResult`, `RetrievalStats`, similarity functions |
+| `reranking.rs` | ✅ | `RerankerType`, `FusionMethod`, `RerankerConfig`, `Bm25Config`, `calculate_rrf_score()`, `calculate_bm25_score()` |
+| `mod.rs` | ✅ | Module re-exports |
+
+**Cross-Language Examples:**
+
+```python
+# Python (hf_gtc)
+from hf_gtc.rag import ChunkingStrategy, create_chunking_config, calculate_rrf_score
+config = create_chunking_config(chunk_size=512, overlap=50)
+rrf = calculate_rrf_score(rank=1, k=60)
+```
+
+```rust
+// Rust (this corpus)
+use batuta_ground_truth_mlops_corpus::rag::{
+    ChunkConfig, ChunkingStrategy, chunk_document,
+    RagConfig, calculate_rrf_score
+};
+let config = ChunkConfig::new().chunk_size(512).overlap(50);
+let result = chunk_document(&text, &config);
+let rrf = calculate_rrf_score(1, 60);
+```
+
+---
+
+### 10-14. Planned Modules (P2/P3)
 
 #### 10. Agents (`hf_gtc.agents` → `agents`) - P2
 
