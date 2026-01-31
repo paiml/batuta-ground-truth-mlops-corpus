@@ -60,7 +60,7 @@ impl PipelineConfig {
 }
 
 /// Result of inference pipeline
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct PipelineResult {
     /// Output scores/logits
     pub scores: Vec<f64>,
@@ -70,17 +70,6 @@ pub struct PipelineResult {
     pub confidences: Vec<f64>,
     /// Processing time in milliseconds
     pub elapsed_ms: u64,
-}
-
-impl Default for PipelineResult {
-    fn default() -> Self {
-        Self {
-            scores: Vec::new(),
-            labels: Vec::new(),
-            confidences: Vec::new(),
-            elapsed_ms: 0,
-        }
-    }
 }
 
 impl PipelineResult {

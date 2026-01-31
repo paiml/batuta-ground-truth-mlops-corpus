@@ -13,6 +13,8 @@
 //!
 //! # Module Overview
 //!
+//! ## P0 (Core MLOps)
+//!
 //! | Module | Purpose | Python Equivalent |
 //! |--------|---------|-------------------|
 //! | [`preprocessing`] | Text/data preprocessing | `hf_gtc.preprocessing` |
@@ -22,11 +24,22 @@
 //! | [`evaluation`] | Metrics and evaluation | `hf_gtc.evaluation` |
 //! | [`deployment`] | Export and quantization | `hf_gtc.deployment` |
 //!
+//! ## P1 (Hub, Generation, RAG)
+//!
+//! | Module | Purpose | Python Equivalent |
+//! |--------|---------|-------------------|
+//! | [`hub`] | Model registry, versioning | `hf_gtc.hub` |
+//! | [`generation`] | Text generation, sampling | `hf_gtc.generation` |
+//! | [`rag`] | Chunking, retrieval, reranking | `hf_gtc.rag` |
+//!
 //! # Quick Start
 //!
 //! ```rust
 //! use batuta_ground_truth_mlops_corpus::preprocessing::{Tokenizer, TokenizerConfig};
 //! use batuta_ground_truth_mlops_corpus::models::RandomForestConfig;
+//! use batuta_ground_truth_mlops_corpus::hub::{RegistryConfig, ModelStage};
+//! use batuta_ground_truth_mlops_corpus::generation::{SamplingConfig, SamplingStrategy};
+//! use batuta_ground_truth_mlops_corpus::rag::{ChunkConfig, RagConfig};
 //!
 //! // Tokenization
 //! let tokenizer = Tokenizer::new(TokenizerConfig::default());
@@ -38,17 +51,37 @@
 //!     .n_estimators(100)
 //!     .max_depth(Some(10));
 //! assert_eq!(config.n_estimators, 100);
+//!
+//! // Model registry
+//! let registry = RegistryConfig::new("my-model").namespace("org");
+//! assert!(registry.validate().is_ok());
+//!
+//! // Text generation
+//! let sampling = SamplingConfig::new()
+//!     .strategy(SamplingStrategy::TopP)
+//!     .temperature(0.7);
+//! assert!(sampling.validate().is_ok());
+//!
+//! // RAG chunking
+//! let chunks = ChunkConfig::new().chunk_size(512).overlap(50);
+//! assert!(chunks.validate().is_ok());
 //! ```
 
 #![warn(missing_docs)]
 #![warn(clippy::all)]
 
+// P0: Core MLOps
 pub mod preprocessing;
 pub mod models;
 pub mod training;
 pub mod inference;
 pub mod evaluation;
 pub mod deployment;
+
+// P1: Hub, Generation, RAG
+pub mod hub;
+pub mod generation;
+pub mod rag;
 
 /// Common error types for the corpus
 pub mod error {
@@ -93,9 +126,24 @@ mod tests {
 
     #[test]
     fn test_module_exports() {
-        // Verify all modules are accessible
+        // Verify P0 modules are accessible
         let _ = preprocessing::TokenizerConfig::default();
         let _ = models::RandomForestConfig::default();
+        let _ = training::TrainerConfig::default();
+        let _ = inference::PipelineConfig::default();
+        let _ = evaluation::ClassificationMetrics::default();
+        let _ = deployment::ExportConfig::default();
+    }
+
+    #[test]
+    fn test_p1_module_exports() {
+        // Verify P1 modules are accessible
+        let _ = hub::RegistryConfig::default();
+        let _ = hub::ModelStage::default();
+        let _ = generation::SamplingConfig::default();
+        let _ = generation::PromptTemplate::default();
+        let _ = rag::ChunkConfig::default();
+        let _ = rag::RagConfig::default();
     }
 
     #[test]
