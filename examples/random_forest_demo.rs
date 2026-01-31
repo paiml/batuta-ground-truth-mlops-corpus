@@ -1,7 +1,7 @@
 //! Random Forest configuration example demonstrating model configurations
 
 use batuta_ground_truth_mlops_corpus::models::{
-    RandomForestConfig, DecisionTreeConfig, SplitCriterion, MaxFeatures,
+    RandomForestConfig, DecisionTreeConfig,
     GradientBoostingConfig, TransformerConfig,
 };
 

@@ -1,0 +1,11 @@
+[book]
+title = "Batuta Ground Truth MLOps Corpus"
+description = "Production-ready Rust MLOps patterns for the Sovereign AI Stack"
+authors = ["Pragmatic AI Labs"]
+language = "en"
+
+[output.html]
+default-theme = "rust"
+preferred-dark-theme = "coal"
+git-repository-url = "https://github.com/paiml/batuta-ground-truth-mlops-corpus"
+site-url = "/batuta-ground-truth-mlops-corpus/"

@@ -36,3 +36,31 @@ path = "examples/tokenization_demo.rs"
 [[example]]
 name = "random_forest_demo"
 path = "examples/random_forest_demo.rs"
+
+[[example]]
+name = "training_demo"
+path = "examples/training_demo.rs"
+
+[[example]]
+name = "generation_demo"
+path = "examples/generation_demo.rs"
+
+[[example]]
+name = "rag_demo"
+path = "examples/rag_demo.rs"
+
+[[example]]
+name = "agents_demo"
+path = "examples/agents_demo.rs"
+
+[[example]]
+name = "safety_demo"
+path = "examples/safety_demo.rs"
+
+[[example]]
+name = "evaluation_demo"
+path = "examples/evaluation_demo.rs"
+
+[[example]]
+name = "hub_demo"
+path = "examples/hub_demo.rs"
