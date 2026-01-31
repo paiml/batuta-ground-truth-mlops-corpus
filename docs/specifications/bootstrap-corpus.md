@@ -1,10 +1,10 @@
 # Bootstrap Corpus Specification
 
-**Version:** 0.5.1
-**Status:** Active Development
+**Version:** 0.6.0
+**Status:** Feature Complete
 **PMAT Target:** A+ Grade (95%+ coverage, 80%+ mutation score)
 **Python Reference:** `hf-ground-truth-corpus` (14 modules, 7,800 lines API)
-**Current Coverage:** 98.77% (955 tests)
+**Current Coverage:** 98.77% (998 tests: 955 unit + 38 integration + 5 doc)
 
 ---
 
@@ -41,7 +41,7 @@ Full parity with `hf-ground-truth-corpus` 14 modules:
 | 11 | `hf_gtc.safety` | `safety` | ✅ Done | 4 | P2 |
 | 12 | `hf_gtc.audio` | `audio` | ✅ Done | 3 | P3 |
 | 13 | `hf_gtc.multimodal` | `multimodal` | ✅ Done | 3 | P3 |
-| 14 | (tests) | `tests` | 🔄 Partial | - | P0 |
+| 14 | (tests) | `tests` | ✅ Done | 2 | P0 |
 
 ---
 
