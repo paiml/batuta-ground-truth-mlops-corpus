@@ -1,10 +1,10 @@
 # Bootstrap Corpus Specification
 
-**Version:** 0.3.0
+**Version:** 0.4.0
 **Status:** Active Development
 **PMAT Target:** A+ Grade (95%+ coverage, 80%+ mutation score)
 **Python Reference:** `hf-ground-truth-corpus` (14 modules, 7,800 lines API)
-**Current Coverage:** 97.42% (466 tests)
+**Current Coverage:** 97.79% (674 tests)
 
 ---
 
@@ -37,8 +37,8 @@ Full parity with `hf-ground-truth-corpus` 14 modules:
 | 7 | `hf_gtc.hub` | `hub` | ✅ Done | 4 | P1 |
 | 8 | `hf_gtc.generation` | `generation` | ✅ Done | 4 | P1 |
 | 9 | `hf_gtc.rag` | `rag` | ✅ Done | 4 | P1 |
-| 10 | `hf_gtc.agents` | `agents` | 🔲 Planned | 0 | P2 |
-| 11 | `hf_gtc.safety` | `safety` | 🔲 Planned | 0 | P2 |
+| 10 | `hf_gtc.agents` | `agents` | ✅ Done | 4 | P2 |
+| 11 | `hf_gtc.safety` | `safety` | ✅ Done | 4 | P2 |
 | 12 | `hf_gtc.audio` | `audio` | 🔲 Planned | 0 | P3 |
 | 13 | `hf_gtc.multimodal` | `multimodal` | 🔲 Planned | 0 | P3 |
 | 14 | (tests) | `tests` | 🔄 Partial | - | P0 |
@@ -422,27 +422,77 @@ let rrf = calculate_rrf_score(1, 60);
 
 ---
 
-### 10-14. Planned Modules (P2/P3)
-
-#### 10. Agents (`hf_gtc.agents` → `agents`) - P2
+### 10. Agents (`hf_gtc.agents` → `agents`) - ✅ IMPLEMENTED
 
 **Python Reference**: 4 files, 171 lines API
 
-| Python File | Rust Equivalent | Key Types |
-|-------------|-----------------|-----------|
-| `memory.py` | `memory.rs` | Working/long-term memory |
-| `planning.py` | `planning.rs` | ReAct, tree search |
-| `tools.py` | `tools.rs` | Tool definitions |
+| Rust File | Status | Key Types |
+|-----------|--------|-----------|
+| `memory.rs` | ✅ | `MemoryType`, `BufferConfig`, `WindowConfig`, `SummaryConfig`, `EntityConfig`, `ConversationMessage`, `MemoryStats` |
+| `planning.rs` | ✅ | `PlanningStrategy`, `TaskStatus`, `PlanConfig`, `PlanStep`, `TaskNode`, `ExecutionPlan`, `PlanningStats` |
+| `tools.rs` | ✅ | `ToolType`, `ParamType`, `ToolParameter`, `ToolDefinition`, `ToolCall`, `ToolResult`, `AgentConfig`, `ReActConfig`, `ToolStats` |
+| `mod.rs` | ✅ | Module re-exports |
 
-#### 11. Safety (`hf_gtc.safety` → `safety`) - P2
+**Cross-Language Examples:**
+
+```python
+# Python (hf_gtc)
+from hf_gtc.agents import MemoryType, BufferConfig, create_buffer_config
+config = create_buffer_config(max_messages=100)
+```
+
+```rust
+// Rust (this corpus)
+use batuta_ground_truth_mlops_corpus::agents::{
+    MemoryType, BufferConfig, AgentConfig, ToolDefinition
+};
+let memory = BufferConfig::new().max_messages(100);
+let agent = AgentConfig::new("assistant")
+    .tool(ToolDefinition::new("search", "Search the web"))
+    .max_iterations(10);
+```
+
+---
+
+### 11. Safety (`hf_gtc.safety` → `safety`) - ✅ IMPLEMENTED
 
 **Python Reference**: 4 files, 192 lines API
 
-| Python File | Rust Equivalent | Key Types |
-|-------------|-----------------|-----------|
-| `guardrails.py` | `guardrails.rs` | Input/output validation |
-| `privacy.py` | `privacy.rs` | Differential privacy (Poka-Yoke tiers) |
-| `watermarking.py` | `watermarking.rs` | Model watermarking |
+| Rust File | Status | Key Types |
+|-----------|--------|-----------|
+| `guardrails.rs` | ✅ | `GuardrailType`, `ContentCategory`, `GuardrailAction`, `ContentFilterConfig`, `InputValidationConfig`, `RateLimitConfig`, `GuardrailResult`, `GuardrailStats` |
+| `privacy.rs` | ✅ | `PiiType`, `AnonymizationMethod`, `ComplianceStandard`, `PiiDetection`, `PrivacyConfig`, `AnonymizationResult`, `PrivacyStats`, `RetentionConfig` |
+| `watermarking.rs` | ✅ | `WatermarkType`, `DetectionMethod`, `WatermarkConfig`, `DetectionConfig`, `EmbedResult`, `DetectionResult`, `WatermarkStats`, `VocabBiasConfig` |
+| `mod.rs` | ✅ | Module re-exports |
+
+**Cross-Language Examples:**
+
+```python
+# Python (hf_gtc)
+from hf_gtc.safety import GuardrailType, ContentFilter, PiiType, detect_pii
+filter = create_guardrail(GuardrailType.CONTENT_FILTER, threshold=0.8)
+detected = detect_pii(text, types=[PiiType.EMAIL, PiiType.PHONE])
+```
+
+```rust
+// Rust (this corpus)
+use batuta_ground_truth_mlops_corpus::safety::{
+    ContentFilterConfig, ContentCategory, GuardrailAction,
+    PrivacyConfig, PiiType, AnonymizationMethod
+};
+let filter = ContentFilterConfig::new()
+    .threshold(0.8)
+    .category(ContentCategory::Harmful)
+    .action(GuardrailAction::Block);
+let privacy = PrivacyConfig::new()
+    .pii_type(PiiType::Email)
+    .pii_type(PiiType::Phone)
+    .method(AnonymizationMethod::Mask);
+```
+
+---
+
+### 12-14. Planned Modules (P3)
 
 #### 12-13. Audio/Multimodal - P3
 
@@ -516,18 +566,18 @@ jugar-probar = "1.0"  # Property-based testing (Hypothesis equivalent)
 - [ ] Property-based tests with jugar-probar
 - [ ] Integration tests with trueno tensors
 
-### Phase 3: P1 Modules (Hub, Generation, RAG)
+### Phase 3: P1 Modules (Hub, Generation, RAG) ✅
 
-- [ ] `hub` - model search, versioning, registry
-- [ ] `generation` - prompting, chat, sampling
-- [ ] `rag` - vectorstore, chunking, retrieval
+- [x] `hub` - model registry, versioning, datasets
+- [x] `generation` - prompting, chat, sampling
+- [x] `rag` - chunking, retrieval, reranking
 
-### Phase 4: P2 Modules (Agents, Safety)
+### Phase 4: P2 Modules (Agents, Safety) ✅
 
-- [ ] `agents` - memory, planning, tools
-- [ ] `safety` - guardrails, privacy, watermarking
+- [x] `agents` - memory, planning, tools
+- [x] `safety` - guardrails, privacy, watermarking
 
-### Phase 5: P3 Modules (Audio, Multimodal)
+### Phase 5: P3 Modules (Audio, Multimodal) 🔲
 
 - [ ] `audio` - speech, music (maps to whisper-apr)
 - [ ] `multimodal` - video, document, vision
@@ -648,6 +698,22 @@ make examples
 ---
 
 ## Changelog
+
+### v0.4.0 (2026-01-31)
+
+- Implemented P2 modules: `agents` and `safety`
+- `agents` module: memory management (buffer, window, summary, entity), planning strategies (ReAct, tree-of-thoughts), tool definitions and agent configuration
+- `safety` module: content guardrails, PII detection/anonymization, model watermarking
+- Total: 674 tests, 97.79% coverage
+- 11/14 modules complete (P0 + P1 + P2)
+
+### v0.3.0 (2026-01-31)
+
+- Implemented P1 modules: `hub`, `generation`, `rag`
+- `hub`: model registry, versioning, dataset configuration
+- `generation`: sampling strategies, prompting templates, chat conversations
+- `rag`: document chunking, retrieval methods, reranking/fusion
+- Total: 466 tests, 97.42% coverage
 
 ### v0.2.0 (2026-01-31)
 

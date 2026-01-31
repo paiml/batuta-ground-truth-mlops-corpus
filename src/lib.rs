@@ -32,6 +32,13 @@
 //! | [`generation`] | Text generation, sampling | `hf_gtc.generation` |
 //! | [`rag`] | Chunking, retrieval, reranking | `hf_gtc.rag` |
 //!
+//! ## P2 (Agents, Safety)
+//!
+//! | Module | Purpose | Python Equivalent |
+//! |--------|---------|-------------------|
+//! | [`agents`] | Agent workflows, memory, tools | `hf_gtc.agents` |
+//! | [`safety`] | Guardrails, privacy, watermarking | `hf_gtc.safety` |
+//!
 //! # Quick Start
 //!
 //! ```rust
@@ -40,6 +47,8 @@
 //! use batuta_ground_truth_mlops_corpus::hub::{RegistryConfig, ModelStage};
 //! use batuta_ground_truth_mlops_corpus::generation::{SamplingConfig, SamplingStrategy};
 //! use batuta_ground_truth_mlops_corpus::rag::{ChunkConfig, RagConfig};
+//! use batuta_ground_truth_mlops_corpus::agents::{AgentConfig, ToolDefinition};
+//! use batuta_ground_truth_mlops_corpus::safety::{ContentFilterConfig, PrivacyConfig};
 //!
 //! // Tokenization
 //! let tokenizer = Tokenizer::new(TokenizerConfig::default());
@@ -65,6 +74,18 @@
 //! // RAG chunking
 //! let chunks = ChunkConfig::new().chunk_size(512).overlap(50);
 //! assert!(chunks.validate().is_ok());
+//!
+//! // Agent configuration
+//! let agent = AgentConfig::new("assistant")
+//!     .tool(ToolDefinition::new("search", "Search the web"))
+//!     .max_iterations(10);
+//! assert!(agent.validate().is_ok());
+//!
+//! // Safety guardrails
+//! let filter = ContentFilterConfig::new().threshold(0.9);
+//! let privacy = PrivacyConfig::new().threshold(0.8);
+//! assert!(filter.validate().is_ok());
+//! assert!(privacy.validate().is_ok());
 //! ```
 
 #![warn(missing_docs)]
@@ -82,6 +103,10 @@ pub mod deployment;
 pub mod hub;
 pub mod generation;
 pub mod rag;
+
+// P2: Agents, Safety
+pub mod agents;
+pub mod safety;
 
 /// Common error types for the corpus
 pub mod error {
@@ -144,6 +169,20 @@ mod tests {
         let _ = generation::PromptTemplate::default();
         let _ = rag::ChunkConfig::default();
         let _ = rag::RagConfig::default();
+    }
+
+    #[test]
+    fn test_p2_module_exports() {
+        // Verify P2 modules are accessible
+        let _ = agents::MemoryType::default();
+        let _ = agents::BufferConfig::default();
+        let _ = agents::PlanningStrategy::default();
+        let _ = agents::ToolType::default();
+        let _ = agents::AgentConfig::default();
+        let _ = safety::GuardrailType::default();
+        let _ = safety::ContentCategory::default();
+        let _ = safety::PiiType::default();
+        let _ = safety::WatermarkType::default();
     }
 
     #[test]
