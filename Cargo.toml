@@ -1,0 +1,38 @@
+[package]
+name = "batuta-ground-truth-mlops-corpus"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+authors = ["Pragmatic AI Labs <info@paiml.com>"]
+description = "Production-ready Rust MLOps patterns for the Sovereign AI Stack"
+license = "MIT"
+repository = "https://github.com/paiml/batuta-ground-truth-mlops-corpus"
+readme = "README.md"
+keywords = ["machine-learning", "mlops", "rust", "sovereign-ai", "ground-truth"]
+categories = ["science", "algorithms"]
+
+[features]
+default = []
+training = []
+inference = []
+
+[dependencies]
+# Sovereign AI Stack ONLY - zero external dependencies
+trueno = "0.14"
+aprender = "0.25"
+
+# Stack training/inference (optional)
+# entrenar = { version = "0.5", optional = true }
+# realizar = { version = "0.6", optional = true }
+
+[dev-dependencies]
+# Sovereign AI Stack testing - jugar-probar for property testing
+jugar-probar = "1.0"
+
+[[example]]
+name = "tokenization_demo"
+path = "examples/tokenization_demo.rs"
+
+[[example]]
+name = "random_forest_demo"
+path = "examples/random_forest_demo.rs"
