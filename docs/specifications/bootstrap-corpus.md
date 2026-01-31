@@ -1,10 +1,10 @@
 # Bootstrap Corpus Specification
 
-**Version:** 0.5.0
+**Version:** 0.5.1
 **Status:** Active Development
 **PMAT Target:** A+ Grade (95%+ coverage, 80%+ mutation score)
 **Python Reference:** `hf-ground-truth-corpus` (14 modules, 7,800 lines API)
-**Current Coverage:** 97.78% (808 tests)
+**Current Coverage:** 98.77% (955 tests)
 
 ---
 
@@ -753,6 +753,13 @@ make examples
 ---
 
 ## Changelog
+
+### v0.5.1 (2026-01-31)
+
+- Coverage improvement: 97.78% → 98.77%
+- Added 147 new tests across all modules
+- Improved coverage for: augmentation.rs (100%), chat.rs (100%), prompting.rs (100%), chunking.rs (100%), lib.rs (100%)
+- Total: 955 tests, 98.77% coverage
 
 ### v0.5.0 (2026-01-31)
 

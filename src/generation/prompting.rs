@@ -636,4 +636,275 @@ mod tests {
         let prompt = template.build(&std::collections::HashMap::new());
         assert!(prompt.contains("step by step"));
     }
+
+    #[test]
+    fn test_prompt_format_parse_text() {
+        assert_eq!(PromptFormat::parse("text"), Some(PromptFormat::Plain));
+    }
+
+    #[test]
+    fn test_prompt_format_parse_chat_ml() {
+        assert_eq!(PromptFormat::parse("chat_ml"), Some(PromptFormat::ChatML));
+    }
+
+    #[test]
+    fn test_prompt_format_parse_vicuna() {
+        assert_eq!(PromptFormat::parse("vicuna"), Some(PromptFormat::Vicuna));
+    }
+
+    #[test]
+    fn test_prompt_format_parse_zephyr() {
+        assert_eq!(PromptFormat::parse("zephyr"), Some(PromptFormat::Zephyr));
+    }
+
+    #[test]
+    fn test_prompt_format_as_str_all() {
+        assert_eq!(PromptFormat::Vicuna.as_str(), "vicuna");
+        assert_eq!(PromptFormat::Zephyr.as_str(), "zephyr");
+    }
+
+    #[test]
+    fn test_prompt_format_system_suffix_all() {
+        assert!(PromptFormat::Plain.system_suffix().contains("\n"));
+        assert!(PromptFormat::ChatML.system_suffix().contains("im_end"));
+        assert!(PromptFormat::Alpaca.system_suffix().contains("\n"));
+        assert!(PromptFormat::Vicuna.system_suffix().contains("\n"));
+        assert!(PromptFormat::Zephyr.system_suffix().contains("</s>"));
+    }
+
+    #[test]
+    fn test_prompt_format_system_prefix_all() {
+        assert_eq!(PromptFormat::Plain.system_prefix(), "");
+        assert!(PromptFormat::Vicuna.system_prefix().contains("SYSTEM"));
+        assert!(PromptFormat::Zephyr.system_prefix().contains("system"));
+    }
+
+    #[test]
+    fn test_few_shot_strategy_parse_diverse() {
+        assert_eq!(FewShotStrategy::parse("diverse"), Some(FewShotStrategy::Diverse));
+    }
+
+    #[test]
+    fn test_few_shot_strategy_parse_random() {
+        assert_eq!(FewShotStrategy::parse("random"), Some(FewShotStrategy::Random));
+    }
+
+    #[test]
+    fn test_few_shot_strategy_parse_fixed() {
+        assert_eq!(FewShotStrategy::parse("fixed"), Some(FewShotStrategy::Fixed));
+    }
+
+    #[test]
+    fn test_few_shot_strategy_parse_unknown() {
+        assert_eq!(FewShotStrategy::parse("unknown"), None);
+    }
+
+    #[test]
+    fn test_few_shot_strategy_as_str_fixed() {
+        assert_eq!(FewShotStrategy::Fixed.as_str(), "fixed");
+    }
+
+    #[test]
+    fn test_reasoning_type_list_all() {
+        let all = ReasoningType::list_all();
+        assert_eq!(all.len(), 5);
+    }
+
+    #[test]
+    fn test_reasoning_type_parse_step_by_step() {
+        assert_eq!(ReasoningType::parse("step_by_step"), Some(ReasoningType::StepByStep));
+    }
+
+    #[test]
+    fn test_reasoning_type_parse_let_think() {
+        assert_eq!(ReasoningType::parse("let_think"), Some(ReasoningType::LetThink));
+    }
+
+    #[test]
+    fn test_reasoning_type_parse_self_consistency() {
+        assert_eq!(ReasoningType::parse("self_consistency"), Some(ReasoningType::SelfConsistency));
+    }
+
+    #[test]
+    fn test_reasoning_type_parse_none() {
+        assert_eq!(ReasoningType::parse("none"), Some(ReasoningType::None));
+    }
+
+    #[test]
+    fn test_reasoning_type_parse_unknown() {
+        assert_eq!(ReasoningType::parse("unknown"), None);
+    }
+
+    #[test]
+    fn test_reasoning_type_as_str_all() {
+        assert_eq!(ReasoningType::None.as_str(), "none");
+        assert_eq!(ReasoningType::LetThink.as_str(), "let_think");
+        assert_eq!(ReasoningType::TreeOfThoughts.as_str(), "tree_of_thoughts");
+    }
+
+    #[test]
+    fn test_reasoning_type_prompt_suffix_all() {
+        assert!(ReasoningType::StepByStep.prompt_suffix().contains("step by step"));
+        assert!(ReasoningType::SelfConsistency.prompt_suffix().contains("multiple ways"));
+        assert!(ReasoningType::TreeOfThoughts.prompt_suffix().contains("different approaches"));
+    }
+
+    #[test]
+    fn test_few_shot_example_format_with_reasoning() {
+        let ex = FewShotExample::new("Q", "A").with_reasoning("Because...");
+        let formatted = ex.format("I: ", "O: ");
+        assert!(formatted.contains("I: Q"));
+        assert!(formatted.contains("Because..."));
+        assert!(formatted.contains("O: A"));
+    }
+
+    #[test]
+    fn test_prompt_format_clone() {
+        let fmt = PromptFormat::Alpaca;
+        let cloned = fmt.clone();
+        assert_eq!(cloned, PromptFormat::Alpaca);
+    }
+
+    #[test]
+    fn test_few_shot_strategy_clone() {
+        let strat = FewShotStrategy::Similar;
+        let cloned = strat.clone();
+        assert_eq!(cloned, FewShotStrategy::Similar);
+    }
+
+    #[test]
+    fn test_reasoning_type_clone() {
+        let rt = ReasoningType::TreeOfThoughts;
+        let cloned = rt.clone();
+        assert_eq!(cloned, ReasoningType::TreeOfThoughts);
+    }
+
+    #[test]
+    fn test_few_shot_example_clone() {
+        let ex = FewShotExample::new("a", "b").with_reasoning("c");
+        let cloned = ex.clone();
+        assert_eq!(cloned.input, "a");
+        assert_eq!(cloned.reasoning, Some("c".to_string()));
+    }
+
+    #[test]
+    fn test_few_shot_config_clone() {
+        let config = FewShotConfig::new().max_examples(10);
+        let cloned = config.clone();
+        assert_eq!(cloned.max_examples, 10);
+    }
+
+    #[test]
+    fn test_prompt_template_clone() {
+        let template = PromptTemplate::new().system("Test");
+        let cloned = template.clone();
+        assert_eq!(cloned.system, "Test");
+    }
+
+    #[test]
+    fn test_prompt_format_debug() {
+        let fmt = PromptFormat::ChatML;
+        let debug = format!("{:?}", fmt);
+        assert!(debug.contains("ChatML"));
+    }
+
+    #[test]
+    fn test_few_shot_strategy_debug() {
+        let strat = FewShotStrategy::Diverse;
+        let debug = format!("{:?}", strat);
+        assert!(debug.contains("Diverse"));
+    }
+
+    #[test]
+    fn test_reasoning_type_debug() {
+        let rt = ReasoningType::SelfConsistency;
+        let debug = format!("{:?}", rt);
+        assert!(debug.contains("SelfConsistency"));
+    }
+
+    #[test]
+    fn test_few_shot_example_debug() {
+        let ex = FewShotExample::new("in", "out");
+        let debug = format!("{:?}", ex);
+        assert!(debug.contains("FewShotExample"));
+    }
+
+    #[test]
+    fn test_few_shot_config_debug() {
+        let config = FewShotConfig::default();
+        let debug = format!("{:?}", config);
+        assert!(debug.contains("FewShotConfig"));
+    }
+
+    #[test]
+    fn test_prompt_template_debug() {
+        let template = PromptTemplate::default();
+        let debug = format!("{:?}", template);
+        assert!(debug.contains("PromptTemplate"));
+    }
+
+    #[test]
+    fn test_prompt_template_estimate_tokens_with_few_shot() {
+        let fs = FewShotConfig::new()
+            .example(FewShotExample::new("long input text", "long output text"));
+        let template = PromptTemplate::new().few_shot(fs);
+        let tokens = template.estimate_tokens();
+        assert!(tokens > 5); // Should include few-shot tokens
+    }
+
+    #[test]
+    fn test_few_shot_config_format_multiple_examples() {
+        let config = FewShotConfig::new()
+            .example(FewShotExample::new("a", "1"))
+            .example(FewShotExample::new("b", "2"))
+            .example(FewShotExample::new("c", "3"))
+            .max_examples(2);
+
+        let formatted = config.format_examples();
+        // Should only include first 2 examples due to max_examples
+        assert!(formatted.contains("Input: a"));
+        assert!(formatted.contains("Input: b"));
+    }
+
+    #[test]
+    fn test_prompt_template_build_with_chatml_format() {
+        let template = PromptTemplate::new()
+            .system("Be helpful")
+            .format(PromptFormat::ChatML);
+
+        let prompt = template.build(&std::collections::HashMap::new());
+        assert!(prompt.contains("<|im_start|>system"));
+        assert!(prompt.contains("<|im_end|>"));
+    }
+
+    #[test]
+    fn test_prompt_template_build_with_alpaca_format() {
+        let template = PromptTemplate::new()
+            .system("Instruction here")
+            .format(PromptFormat::Alpaca);
+
+        let prompt = template.build(&std::collections::HashMap::new());
+        assert!(prompt.contains("### Instruction:"));
+    }
+
+    #[test]
+    fn test_prompt_template_build_with_vicuna_format() {
+        let template = PromptTemplate::new()
+            .system("System prompt")
+            .format(PromptFormat::Vicuna);
+
+        let prompt = template.build(&std::collections::HashMap::new());
+        assert!(prompt.contains("SYSTEM:"));
+    }
+
+    #[test]
+    fn test_prompt_template_build_with_zephyr_format() {
+        let template = PromptTemplate::new()
+            .system("Zephyr system")
+            .format(PromptFormat::Zephyr);
+
+        let prompt = template.build(&std::collections::HashMap::new());
+        assert!(prompt.contains("<|system|>"));
+        assert!(prompt.contains("</s>"));
+    }
 }

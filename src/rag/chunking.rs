@@ -612,4 +612,259 @@ mod tests {
         let size = get_recommended_chunk_size(8192, 0.25);
         assert_eq!(size, 2048);
     }
+
+    #[test]
+    fn test_chunking_strategy_parse_paragraph() {
+        assert_eq!(ChunkingStrategy::parse("paragraph"), Some(ChunkingStrategy::Paragraph));
+        assert_eq!(ChunkingStrategy::parse("para"), Some(ChunkingStrategy::Paragraph));
+    }
+
+    #[test]
+    fn test_chunking_strategy_parse_semantic() {
+        assert_eq!(ChunkingStrategy::parse("semantic"), Some(ChunkingStrategy::Semantic));
+    }
+
+    #[test]
+    fn test_chunking_strategy_parse_recursive() {
+        assert_eq!(ChunkingStrategy::parse("recursive"), Some(ChunkingStrategy::Recursive));
+        assert_eq!(ChunkingStrategy::parse("recursive_char"), Some(ChunkingStrategy::Recursive));
+    }
+
+    #[test]
+    fn test_chunking_strategy_parse_char() {
+        assert_eq!(ChunkingStrategy::parse("char"), Some(ChunkingStrategy::FixedSize));
+    }
+
+    #[test]
+    fn test_chunking_strategy_as_str_all() {
+        assert_eq!(ChunkingStrategy::Paragraph.as_str(), "paragraph");
+        assert_eq!(ChunkingStrategy::Recursive.as_str(), "recursive");
+    }
+
+    #[test]
+    fn test_overlap_type_parse_tokens() {
+        assert_eq!(OverlapType::parse("tokens"), Some(OverlapType::Tokens));
+        assert_eq!(OverlapType::parse("token"), Some(OverlapType::Tokens));
+    }
+
+    #[test]
+    fn test_overlap_type_parse_none() {
+        assert_eq!(OverlapType::parse("none"), Some(OverlapType::None));
+        assert_eq!(OverlapType::parse("no"), Some(OverlapType::None));
+    }
+
+    #[test]
+    fn test_overlap_type_parse_percent() {
+        assert_eq!(OverlapType::parse("percent"), Some(OverlapType::Percentage));
+        assert_eq!(OverlapType::parse("percentage"), Some(OverlapType::Percentage));
+    }
+
+    #[test]
+    fn test_overlap_type_parse_characters() {
+        assert_eq!(OverlapType::parse("characters"), Some(OverlapType::Characters));
+        assert_eq!(OverlapType::parse("char"), Some(OverlapType::Characters));
+    }
+
+    #[test]
+    fn test_overlap_type_parse_unknown() {
+        assert_eq!(OverlapType::parse("unknown"), None);
+    }
+
+    #[test]
+    fn test_overlap_type_list_all() {
+        let all = OverlapType::list_all();
+        assert_eq!(all.len(), 4);
+    }
+
+    #[test]
+    fn test_overlap_type_as_str_all() {
+        assert_eq!(OverlapType::Percentage.as_str(), "percentage");
+        assert_eq!(OverlapType::None.as_str(), "none");
+    }
+
+    #[test]
+    fn test_boundary_detection_parse_none() {
+        assert_eq!(BoundaryDetection::parse("none"), Some(BoundaryDetection::None));
+    }
+
+    #[test]
+    fn test_boundary_detection_parse_sentence() {
+        assert_eq!(BoundaryDetection::parse("sentence"), Some(BoundaryDetection::Sentence));
+        assert_eq!(BoundaryDetection::parse("sent"), Some(BoundaryDetection::Sentence));
+    }
+
+    #[test]
+    fn test_boundary_detection_parse_paragraph() {
+        assert_eq!(BoundaryDetection::parse("paragraph"), Some(BoundaryDetection::Paragraph));
+        assert_eq!(BoundaryDetection::parse("para"), Some(BoundaryDetection::Paragraph));
+    }
+
+    #[test]
+    fn test_boundary_detection_parse_unknown() {
+        assert_eq!(BoundaryDetection::parse("unknown"), None);
+    }
+
+    #[test]
+    fn test_boundary_detection_list_all() {
+        let all = BoundaryDetection::list_all();
+        assert_eq!(all.len(), 4);
+    }
+
+    #[test]
+    fn test_boundary_detection_as_str_all() {
+        assert_eq!(BoundaryDetection::None.as_str(), "none");
+        assert_eq!(BoundaryDetection::Sentence.as_str(), "sentence");
+        assert_eq!(BoundaryDetection::Paragraph.as_str(), "paragraph");
+        assert_eq!(BoundaryDetection::CodeBlock.as_str(), "code_block");
+    }
+
+    #[test]
+    fn test_chunk_document_strip_whitespace_false() {
+        let config = ChunkConfig::new()
+            .chunk_size(20)
+            .overlap(0)
+            .min_chunk_size(1)
+            .strip_whitespace(false);
+        let text = "   Hello world   ";
+        let result = chunk_document(text, &config);
+        // With strip_whitespace false, leading/trailing spaces should be preserved
+        assert!(!result.chunks.is_empty());
+        // The content should include the spaces
+        assert!(result.chunks[0].content.starts_with(' '));
+    }
+
+    #[test]
+    fn test_chunk_document_large_overlap() {
+        // Overlap >= chunk_size should still work (step becomes 1)
+        let config = ChunkConfig::new()
+            .chunk_size(10)
+            .overlap(10)
+            .min_chunk_size(1);
+        let text = "0123456789abcdefghij";
+        let result = chunk_document(text, &config);
+        assert!(!result.chunks.is_empty());
+    }
+
+    #[test]
+    fn test_chunk_result_from_empty_chunks() {
+        let result = ChunkResult::from_chunks(vec![], 100);
+        assert_eq!(result.total_chunks, 0);
+        assert_eq!(result.avg_chunk_size, 0.0);
+    }
+
+    #[test]
+    fn test_chunk_config_effective_overlap_tokens() {
+        let config = ChunkConfig::new()
+            .overlap(50)
+            .overlap_type(OverlapType::Tokens);
+        assert_eq!(config.effective_overlap(), 50);
+    }
+
+    #[test]
+    fn test_chunking_strategy_clone() {
+        let strat = ChunkingStrategy::Semantic;
+        let cloned = strat.clone();
+        assert_eq!(cloned, ChunkingStrategy::Semantic);
+    }
+
+    #[test]
+    fn test_overlap_type_clone() {
+        let ot = OverlapType::Percentage;
+        let cloned = ot.clone();
+        assert_eq!(cloned, OverlapType::Percentage);
+    }
+
+    #[test]
+    fn test_boundary_detection_clone() {
+        let bd = BoundaryDetection::CodeBlock;
+        let cloned = bd.clone();
+        assert_eq!(cloned, BoundaryDetection::CodeBlock);
+    }
+
+    #[test]
+    fn test_chunk_config_clone() {
+        let config = ChunkConfig::new().chunk_size(256);
+        let cloned = config.clone();
+        assert_eq!(cloned.chunk_size, 256);
+    }
+
+    #[test]
+    fn test_chunk_clone() {
+        let chunk = Chunk::new("test", 0, 4, 0).with_document_id("doc");
+        let cloned = chunk.clone();
+        assert_eq!(cloned.content, "test");
+        assert_eq!(cloned.document_id, Some("doc".to_string()));
+    }
+
+    #[test]
+    fn test_chunk_result_clone() {
+        let result = ChunkResult::from_chunks(vec![Chunk::new("a", 0, 1, 0)], 1);
+        let cloned = result.clone();
+        assert_eq!(cloned.total_chunks, 1);
+    }
+
+    #[test]
+    fn test_chunking_strategy_debug() {
+        let strat = ChunkingStrategy::Recursive;
+        let debug = format!("{:?}", strat);
+        assert!(debug.contains("Recursive"));
+    }
+
+    #[test]
+    fn test_overlap_type_debug() {
+        let ot = OverlapType::Tokens;
+        let debug = format!("{:?}", ot);
+        assert!(debug.contains("Tokens"));
+    }
+
+    #[test]
+    fn test_boundary_detection_debug() {
+        let bd = BoundaryDetection::Paragraph;
+        let debug = format!("{:?}", bd);
+        assert!(debug.contains("Paragraph"));
+    }
+
+    #[test]
+    fn test_chunk_config_debug() {
+        let config = ChunkConfig::default();
+        let debug = format!("{:?}", config);
+        assert!(debug.contains("ChunkConfig"));
+    }
+
+    #[test]
+    fn test_chunk_debug() {
+        let chunk = Chunk::new("test", 0, 4, 0);
+        let debug = format!("{:?}", chunk);
+        assert!(debug.contains("Chunk"));
+    }
+
+    #[test]
+    fn test_chunk_result_debug() {
+        let result = ChunkResult::new();
+        let debug = format!("{:?}", result);
+        assert!(debug.contains("ChunkResult"));
+    }
+
+    #[test]
+    fn test_chunk_document_min_chunk_size_filter() {
+        // Chunks smaller than min_chunk_size should be filtered out (except last)
+        let config = ChunkConfig::new()
+            .chunk_size(10)
+            .overlap(0)
+            .min_chunk_size(5);
+        let text = "1234567890ab"; // 12 chars, will create chunks of 10 and 2
+        let result = chunk_document(text, &config);
+        // Last chunk might be smaller but is included
+        assert!(!result.chunks.is_empty());
+    }
+
+    #[test]
+    fn test_chunk_with_multiple_metadata() {
+        let chunk = Chunk::new("test", 0, 4, 0)
+            .with_metadata("key1", "value1")
+            .with_metadata("key2", "value2");
+        assert_eq!(chunk.metadata.len(), 2);
+        assert_eq!(chunk.metadata.get("key1"), Some(&"value1".to_string()));
+        assert_eq!(chunk.metadata.get("key2"), Some(&"value2".to_string()));
+    }
 }

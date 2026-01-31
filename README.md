@@ -8,8 +8,8 @@ Production-ready Rust MLOps patterns for the **Sovereign AI Stack**. Full parity
 
 | Metric | Value |
 |--------|-------|
-| Tests | 808 |
-| Coverage | 97.78% |
+| Tests | 955 |
+| Coverage | 98.77% |
 | Modules | 13/14 |
 | PMAT Grade | A+ |
 | External Deps | Zero |
@@ -118,10 +118,10 @@ aprender = "0.25"  # ML algorithms
 # Build
 cargo build
 
-# Test (808 tests)
+# Test (955 tests)
 cargo test
 
-# Coverage (97.78%)
+# Coverage (98.77%)
 make coverage
 
 # Lint

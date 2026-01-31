@@ -229,6 +229,38 @@ mod tests {
     }
 
     #[test]
+    fn test_error_display_model_not_found() {
+        let err = CorpusError::ModelNotFound("my-model".to_string());
+        let display = err.to_string();
+        assert!(display.contains("Model not found"));
+        assert!(display.contains("my-model"));
+    }
+
+    #[test]
+    fn test_error_display_tokenization() {
+        let err = CorpusError::TokenizationError("invalid utf8".to_string());
+        let display = err.to_string();
+        assert!(display.contains("Tokenization failed"));
+        assert!(display.contains("invalid utf8"));
+    }
+
+    #[test]
+    fn test_error_display_training() {
+        let err = CorpusError::TrainingError("convergence failure".to_string());
+        let display = err.to_string();
+        assert!(display.contains("Training failed"));
+        assert!(display.contains("convergence failure"));
+    }
+
+    #[test]
+    fn test_error_display_inference() {
+        let err = CorpusError::InferenceError("out of memory".to_string());
+        let display = err.to_string();
+        assert!(display.contains("Inference failed"));
+        assert!(display.contains("out of memory"));
+    }
+
+    #[test]
     fn test_error_variants() {
         let errors = vec![
             CorpusError::InvalidInput("a".into()),
@@ -238,5 +270,51 @@ mod tests {
             CorpusError::InferenceError("e".into()),
         ];
         assert_eq!(errors.len(), 5);
+    }
+
+    #[test]
+    fn test_error_debug() {
+        let err = CorpusError::InvalidInput("test".to_string());
+        let debug = format!("{:?}", err);
+        assert!(debug.contains("InvalidInput"));
+    }
+
+    #[test]
+    fn test_error_clone() {
+        let err = CorpusError::ModelNotFound("model".to_string());
+        let cloned = err.clone();
+        assert_eq!(err, cloned);
+    }
+
+    #[test]
+    fn test_error_eq() {
+        let err1 = CorpusError::TrainingError("a".to_string());
+        let err2 = CorpusError::TrainingError("a".to_string());
+        let err3 = CorpusError::TrainingError("b".to_string());
+        assert_eq!(err1, err2);
+        assert_ne!(err1, err3);
+    }
+
+    #[test]
+    fn test_error_is_error_trait() {
+        use std::error::Error;
+        let err: Box<dyn Error> = Box::new(CorpusError::InvalidInput("test".to_string()));
+        assert!(err.source().is_none());
+    }
+
+    #[test]
+    fn test_result_type_alias() {
+        fn example_fn() -> Result<i32> {
+            Ok(42)
+        }
+        assert_eq!(example_fn().unwrap(), 42);
+    }
+
+    #[test]
+    fn test_result_error() {
+        fn example_err_fn() -> Result<i32> {
+            Err(CorpusError::InvalidInput("bad".to_string()))
+        }
+        assert!(example_err_fn().is_err());
     }
 }

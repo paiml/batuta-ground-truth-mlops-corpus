@@ -698,4 +698,327 @@ mod tests {
         let stats = ChatStats::from_conversation(&conv);
         assert_eq!(stats.avg_tokens, 0.0);
     }
+
+    #[test]
+    fn test_message_role_parse_system() {
+        assert_eq!(MessageRole::parse("system"), Some(MessageRole::System));
+    }
+
+    #[test]
+    fn test_message_role_parse_bot() {
+        assert_eq!(MessageRole::parse("bot"), Some(MessageRole::Assistant));
+    }
+
+    #[test]
+    fn test_message_role_parse_tool() {
+        assert_eq!(MessageRole::parse("tool"), Some(MessageRole::Tool));
+    }
+
+    #[test]
+    fn test_message_role_parse_user() {
+        assert_eq!(MessageRole::parse("user"), Some(MessageRole::User));
+    }
+
+    #[test]
+    fn test_chat_template_format_parse_chat_ml() {
+        assert_eq!(ChatTemplateFormat::parse("chat_ml"), Some(ChatTemplateFormat::ChatML));
+    }
+
+    #[test]
+    fn test_chat_template_format_parse_chatml() {
+        assert_eq!(ChatTemplateFormat::parse("chatml"), Some(ChatTemplateFormat::ChatML));
+    }
+
+    #[test]
+    fn test_chat_template_format_parse_llama3() {
+        assert_eq!(ChatTemplateFormat::parse("llama3"), Some(ChatTemplateFormat::Llama));
+    }
+
+    #[test]
+    fn test_chat_template_format_parse_gemma() {
+        assert_eq!(ChatTemplateFormat::parse("gemma"), Some(ChatTemplateFormat::Gemma));
+    }
+
+    #[test]
+    fn test_chat_template_format_parse_mistral() {
+        assert_eq!(ChatTemplateFormat::parse("mistral"), Some(ChatTemplateFormat::Mistral));
+    }
+
+    #[test]
+    fn test_chat_template_format_parse_raw() {
+        assert_eq!(ChatTemplateFormat::parse("raw"), Some(ChatTemplateFormat::Raw));
+    }
+
+    #[test]
+    fn test_chat_template_format_parse_unknown() {
+        assert_eq!(ChatTemplateFormat::parse("unknown"), None);
+    }
+
+    #[test]
+    fn test_chat_template_format_list_all() {
+        let all = ChatTemplateFormat::list_all();
+        assert_eq!(all.len(), 5);
+    }
+
+    #[test]
+    fn test_chat_template_format_as_str_all() {
+        assert_eq!(ChatTemplateFormat::Raw.as_str(), "raw");
+        assert_eq!(ChatTemplateFormat::Mistral.as_str(), "mistral");
+        assert_eq!(ChatTemplateFormat::Gemma.as_str(), "gemma");
+    }
+
+    #[test]
+    fn test_chat_template_format_bos_all() {
+        assert_eq!(ChatTemplateFormat::Raw.bos_token(), "");
+        assert_eq!(ChatTemplateFormat::ChatML.bos_token(), "");
+        assert_eq!(ChatTemplateFormat::Mistral.bos_token(), "<s>");
+        assert_eq!(ChatTemplateFormat::Gemma.bos_token(), "<bos>");
+    }
+
+    #[test]
+    fn test_chat_template_format_eos_all() {
+        assert_eq!(ChatTemplateFormat::Raw.eos_token(), "");
+        assert_eq!(ChatTemplateFormat::Llama.eos_token(), "</s>");
+        assert_eq!(ChatTemplateFormat::Mistral.eos_token(), "</s>");
+        assert_eq!(ChatTemplateFormat::Gemma.eos_token(), "<eos>");
+    }
+
+    #[test]
+    fn test_chat_message_format_llama_user() {
+        let msg = ChatMessage::user("Hello");
+        let formatted = msg.format(ChatTemplateFormat::Llama);
+        assert!(formatted.contains("[INST]"));
+        assert!(formatted.contains("[/INST]"));
+    }
+
+    #[test]
+    fn test_chat_message_format_llama_assistant() {
+        let msg = ChatMessage::assistant("Hi there");
+        let formatted = msg.format(ChatTemplateFormat::Llama);
+        assert_eq!(formatted, "Hi there");
+    }
+
+    #[test]
+    fn test_chat_message_format_llama_tool() {
+        let msg = ChatMessage::tool("result", "id1");
+        let formatted = msg.format(ChatTemplateFormat::Llama);
+        assert!(formatted.contains("[TOOL]"));
+        assert!(formatted.contains("[/TOOL]"));
+    }
+
+    #[test]
+    fn test_chat_message_format_mistral_user() {
+        let msg = ChatMessage::user("Hello");
+        let formatted = msg.format(ChatTemplateFormat::Mistral);
+        assert!(formatted.contains("[INST]"));
+    }
+
+    #[test]
+    fn test_chat_message_format_mistral_assistant() {
+        let msg = ChatMessage::assistant("Response");
+        let formatted = msg.format(ChatTemplateFormat::Mistral);
+        assert_eq!(formatted, "Response");
+    }
+
+    #[test]
+    fn test_chat_message_format_mistral_system() {
+        let msg = ChatMessage::system("Instructions");
+        let formatted = msg.format(ChatTemplateFormat::Mistral);
+        assert!(formatted.contains("system:"));
+    }
+
+    #[test]
+    fn test_chat_message_format_mistral_tool() {
+        let msg = ChatMessage::tool("data", "call_1");
+        let formatted = msg.format(ChatTemplateFormat::Mistral);
+        assert!(formatted.contains("tool:"));
+    }
+
+    #[test]
+    fn test_chat_message_format_gemma() {
+        let msg = ChatMessage::user("Hello");
+        let formatted = msg.format(ChatTemplateFormat::Gemma);
+        assert!(formatted.contains("<start_of_turn>user"));
+        assert!(formatted.contains("<end_of_turn>"));
+    }
+
+    #[test]
+    fn test_truncation_strategy_as_str_all() {
+        assert_eq!(TruncationStrategy::DropOldest.as_str(), "drop_oldest");
+        assert_eq!(TruncationStrategy::DropNewest.as_str(), "drop_newest");
+        assert_eq!(TruncationStrategy::Summarize.as_str(), "summarize");
+        assert_eq!(TruncationStrategy::Error.as_str(), "error");
+    }
+
+    #[test]
+    fn test_truncation_strategy_parse_summary() {
+        assert_eq!(TruncationStrategy::parse("summary"), Some(TruncationStrategy::Summarize));
+    }
+
+    #[test]
+    fn test_truncation_strategy_parse_newest() {
+        assert_eq!(TruncationStrategy::parse("newest"), Some(TruncationStrategy::DropNewest));
+    }
+
+    #[test]
+    fn test_truncation_strategy_parse_error() {
+        assert_eq!(TruncationStrategy::parse("error"), Some(TruncationStrategy::Error));
+    }
+
+    #[test]
+    fn test_truncation_strategy_parse_unknown() {
+        assert_eq!(TruncationStrategy::parse("unknown"), None);
+    }
+
+    #[test]
+    fn test_truncation_strategy_list_all() {
+        let all = TruncationStrategy::list_all();
+        assert_eq!(all.len(), 4);
+    }
+
+    #[test]
+    fn test_conversation_with_config() {
+        let config = ConversationConfig::new()
+            .max_tokens(8192)
+            .template(ChatTemplateFormat::Llama);
+        let conv = Conversation::with_config(config);
+        assert_eq!(conv.config.max_tokens, 8192);
+        assert_eq!(conv.config.template, ChatTemplateFormat::Llama);
+    }
+
+    #[test]
+    fn test_conversation_add_raw_message() {
+        let mut conv = Conversation::new();
+        let msg = ChatMessage::new(MessageRole::Tool, "result").with_name("function1");
+        conv.add(msg);
+        assert_eq!(conv.len(), 1);
+        assert_eq!(conv.last().unwrap().name, Some("function1".to_string()));
+    }
+
+    #[test]
+    fn test_conversation_format_with_template() {
+        let config = ConversationConfig::new().template(ChatTemplateFormat::ChatML);
+        let mut conv = Conversation::with_config(config);
+        conv.add_user("Hi");
+
+        let formatted = conv.format();
+        assert!(formatted.contains("<|im_start|>"));
+    }
+
+    #[test]
+    fn test_chat_stats_new() {
+        let stats = ChatStats::new();
+        assert_eq!(stats.total_messages, 0);
+        assert_eq!(stats.user_messages, 0);
+        assert_eq!(stats.assistant_messages, 0);
+        assert_eq!(stats.total_tokens, 0);
+        assert_eq!(stats.avg_tokens, 0.0);
+    }
+
+    #[test]
+    fn test_chat_message_clone() {
+        let msg = ChatMessage::user("Hello").with_name("User1");
+        let cloned = msg.clone();
+        assert_eq!(cloned.content, "Hello");
+        assert_eq!(cloned.name, Some("User1".to_string()));
+    }
+
+    #[test]
+    fn test_conversation_clone() {
+        let mut conv = Conversation::new();
+        conv.add_user("Test");
+        let cloned = conv.clone();
+        assert_eq!(cloned.len(), 1);
+    }
+
+    #[test]
+    fn test_conversation_config_clone() {
+        let config = ConversationConfig::new().max_tokens(1000);
+        let cloned = config.clone();
+        assert_eq!(cloned.max_tokens, 1000);
+    }
+
+    #[test]
+    fn test_chat_stats_clone() {
+        let stats = ChatStats {
+            total_messages: 10,
+            user_messages: 5,
+            assistant_messages: 5,
+            total_tokens: 200,
+            avg_tokens: 20.0,
+        };
+        let cloned = stats.clone();
+        assert_eq!(cloned.total_messages, 10);
+    }
+
+    #[test]
+    fn test_message_role_clone() {
+        let role = MessageRole::System;
+        let cloned = role.clone();
+        assert_eq!(cloned, MessageRole::System);
+    }
+
+    #[test]
+    fn test_chat_template_format_clone() {
+        let fmt = ChatTemplateFormat::Llama;
+        let cloned = fmt.clone();
+        assert_eq!(cloned, ChatTemplateFormat::Llama);
+    }
+
+    #[test]
+    fn test_truncation_strategy_clone() {
+        let strat = TruncationStrategy::Summarize;
+        let cloned = strat.clone();
+        assert_eq!(cloned, TruncationStrategy::Summarize);
+    }
+
+    #[test]
+    fn test_message_role_debug() {
+        let role = MessageRole::Assistant;
+        let debug = format!("{:?}", role);
+        assert!(debug.contains("Assistant"));
+    }
+
+    #[test]
+    fn test_chat_template_format_debug() {
+        let fmt = ChatTemplateFormat::ChatML;
+        let debug = format!("{:?}", fmt);
+        assert!(debug.contains("ChatML"));
+    }
+
+    #[test]
+    fn test_truncation_strategy_debug() {
+        let strat = TruncationStrategy::Error;
+        let debug = format!("{:?}", strat);
+        assert!(debug.contains("Error"));
+    }
+
+    #[test]
+    fn test_chat_message_debug() {
+        let msg = ChatMessage::user("Test");
+        let debug = format!("{:?}", msg);
+        assert!(debug.contains("User"));
+        assert!(debug.contains("Test"));
+    }
+
+    #[test]
+    fn test_conversation_debug() {
+        let conv = Conversation::new();
+        let debug = format!("{:?}", conv);
+        assert!(debug.contains("Conversation"));
+    }
+
+    #[test]
+    fn test_conversation_config_debug() {
+        let config = ConversationConfig::default();
+        let debug = format!("{:?}", config);
+        assert!(debug.contains("max_tokens"));
+    }
+
+    #[test]
+    fn test_chat_stats_debug() {
+        let stats = ChatStats::default();
+        let debug = format!("{:?}", stats);
+        assert!(debug.contains("total_messages"));
+    }
 }
