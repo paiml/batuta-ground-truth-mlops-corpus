@@ -8,9 +8,9 @@ Production-ready Rust MLOps patterns for the **Sovereign AI Stack**. Full parity
 
 | Metric | Value |
 |--------|-------|
-| Tests | 674 |
-| Coverage | 97.79% |
-| Modules | 11/14 |
+| Tests | 808 |
+| Coverage | 97.78% |
+| Modules | 13/14 |
 | PMAT Grade | A+ |
 | External Deps | Zero |
 
@@ -42,12 +42,12 @@ Production-ready Rust MLOps patterns for the **Sovereign AI Stack**. Full parity
 | `agents` | Agent workflows, memory, tools | `AgentConfig`, `BufferConfig`, `ToolDefinition` |
 | `safety` | Guardrails, privacy, watermarking | `ContentFilterConfig`, `PrivacyConfig`, `WatermarkConfig` |
 
-### P3 - Audio, Multimodal (Planned)
+### P3 - Audio, Multimodal (Complete)
 
-| Module | Purpose | Status |
-|--------|---------|--------|
-| `audio` | Speech processing | Maps to whisper-apr |
-| `multimodal` | Vision, document | Planned |
+| Module | Purpose | Key Types |
+|--------|---------|-----------|
+| `audio` | Speech, audio features | `AudioConfig`, `SpeechConfig`, `TranscriptionResult` |
+| `multimodal` | Vision, document processing | `VisionConfig`, `DocumentConfig`, `BoundingBox` |
 
 ## Quick Start
 
@@ -59,6 +59,8 @@ use batuta_ground_truth_mlops_corpus::generation::SamplingConfig;
 use batuta_ground_truth_mlops_corpus::rag::ChunkConfig;
 use batuta_ground_truth_mlops_corpus::agents::{AgentConfig, ToolDefinition};
 use batuta_ground_truth_mlops_corpus::safety::{ContentFilterConfig, PrivacyConfig};
+use batuta_ground_truth_mlops_corpus::audio::{AudioConfig, SpeechConfig};
+use batuta_ground_truth_mlops_corpus::multimodal::{VisionConfig, DocumentConfig};
 
 // Tokenization
 let tokenizer = Tokenizer::new(TokenizerConfig::default());
@@ -90,6 +92,14 @@ let agent = AgentConfig::new("assistant")
 // Safety guardrails
 let filter = ContentFilterConfig::new().threshold(0.9);
 let privacy = PrivacyConfig::new().threshold(0.8);
+
+// Audio processing (Whisper-style)
+let audio = AudioConfig::whisper().n_mels(80).sample_rate(16000);
+let speech = SpeechConfig::new().timestamps(true);
+
+// Multimodal (vision + document)
+let vision = VisionConfig::clip().size(224).normalize(true);
+let doc = DocumentConfig::new().ocr_enabled(true);
 ```
 
 ## Dependencies
@@ -108,10 +118,10 @@ aprender = "0.25"  # ML algorithms
 # Build
 cargo build
 
-# Test (674 tests)
+# Test (808 tests)
 cargo test
 
-# Coverage (97.79%)
+# Coverage (97.78%)
 make coverage
 
 # Lint

@@ -1,10 +1,10 @@
 # Bootstrap Corpus Specification
 
-**Version:** 0.4.0
+**Version:** 0.5.0
 **Status:** Active Development
 **PMAT Target:** A+ Grade (95%+ coverage, 80%+ mutation score)
 **Python Reference:** `hf-ground-truth-corpus` (14 modules, 7,800 lines API)
-**Current Coverage:** 97.79% (674 tests)
+**Current Coverage:** 97.78% (808 tests)
 
 ---
 
@@ -39,8 +39,8 @@ Full parity with `hf-ground-truth-corpus` 14 modules:
 | 9 | `hf_gtc.rag` | `rag` | ✅ Done | 4 | P1 |
 | 10 | `hf_gtc.agents` | `agents` | ✅ Done | 4 | P2 |
 | 11 | `hf_gtc.safety` | `safety` | ✅ Done | 4 | P2 |
-| 12 | `hf_gtc.audio` | `audio` | 🔲 Planned | 0 | P3 |
-| 13 | `hf_gtc.multimodal` | `multimodal` | 🔲 Planned | 0 | P3 |
+| 12 | `hf_gtc.audio` | `audio` | ✅ Done | 3 | P3 |
+| 13 | `hf_gtc.multimodal` | `multimodal` | ✅ Done | 3 | P3 |
 | 14 | (tests) | `tests` | 🔄 Partial | - | P0 |
 
 ---
@@ -492,11 +492,66 @@ let privacy = PrivacyConfig::new()
 
 ---
 
-### 12-14. Planned Modules (P3)
+### 12. Audio (`hf_gtc.audio` → `audio`) - ✅ IMPLEMENTED
 
-#### 12-13. Audio/Multimodal - P3
+**Python Reference**: 4 files, 234 lines API
 
-Lower priority, maps to whisper-apr and future stack components.
+| Rust File | Status | Key Types |
+|-----------|--------|-----------|
+| `features.rs` | ✅ | `FeatureType`, `WindowType`, `AudioConfig`, `AudioFeatures`, `AudioStats`, `hz_to_mel()`, `mel_to_hz()` |
+| `speech.rs` | ✅ | `SpeechModel`, `SpeechTask`, `DecodingStrategy`, `SpeechConfig`, `TranscriptionSegment`, `TranscriptionResult`, `SpeechStats` |
+| `mod.rs` | ✅ | Module re-exports |
+
+**Cross-Language Examples:**
+
+```python
+# Python (hf_gtc)
+from hf_gtc.audio import AudioConfig, FeatureType, create_whisper_config
+config = create_whisper_config(n_mels=80, sample_rate=16000)
+```
+
+```rust
+// Rust (this corpus)
+use batuta_ground_truth_mlops_corpus::audio::{
+    AudioConfig, FeatureType, SpeechConfig, SpeechModel
+};
+let audio = AudioConfig::whisper().n_mels(80).sample_rate(16000);
+let speech = SpeechConfig::new()
+    .model(SpeechModel::WhisperSmall)
+    .timestamps(true);
+```
+
+---
+
+### 13. Multimodal (`hf_gtc.multimodal` → `multimodal`) - ✅ IMPLEMENTED
+
+**Python Reference**: 3 files, 189 lines API
+
+| Rust File | Status | Key Types |
+|-----------|--------|-----------|
+| `vision.rs` | ✅ | `ImageFormat`, `Interpolation`, `VisionModel`, `VisionConfig`, `ImageFeatures`, `VisionStats` |
+| `document.rs` | ✅ | `DocumentType`, `LayoutElement`, `OcrEngine`, `DocumentConfig`, `BoundingBox`, `DocumentRegion`, `DocumentResult`, `DocumentStats` |
+| `mod.rs` | ✅ | Module re-exports |
+
+**Cross-Language Examples:**
+
+```python
+# Python (hf_gtc)
+from hf_gtc.multimodal import VisionConfig, DocumentConfig, ImageFormat
+config = create_clip_config(size=224, normalize=True)
+```
+
+```rust
+// Rust (this corpus)
+use batuta_ground_truth_mlops_corpus::multimodal::{
+    VisionConfig, VisionModel, DocumentConfig, DocumentType, OcrEngine
+};
+let vision = VisionConfig::clip().size(224).normalize(true);
+let doc = DocumentConfig::new()
+    .doc_type(DocumentType::Pdf)
+    .ocr_enabled(true)
+    .ocr_engine(OcrEngine::Tesseract);
+```
 
 ---
 
@@ -577,10 +632,10 @@ jugar-probar = "1.0"  # Property-based testing (Hypothesis equivalent)
 - [x] `agents` - memory, planning, tools
 - [x] `safety` - guardrails, privacy, watermarking
 
-### Phase 5: P3 Modules (Audio, Multimodal) 🔲
+### Phase 5: P3 Modules (Audio, Multimodal) ✅
 
-- [ ] `audio` - speech, music (maps to whisper-apr)
-- [ ] `multimodal` - video, document, vision
+- [x] `audio` - features (mel spectrograms, MFCCs), speech (Whisper, Wav2Vec2)
+- [x] `multimodal` - vision (CLIP, ViT, ResNet), document (OCR, layout analysis)
 
 ---
 
@@ -698,6 +753,14 @@ make examples
 ---
 
 ## Changelog
+
+### v0.5.0 (2026-01-31)
+
+- Implemented P3 modules: `audio` and `multimodal`
+- `audio` module: feature extraction (mel spectrograms, MFCCs, log mel), speech recognition (Whisper variants, Wav2Vec2), transcription with timestamps
+- `multimodal` module: vision processing (CLIP, ViT, ResNet, DINOv2), document understanding (OCR engines, layout analysis, bounding boxes)
+- Total: 808 tests, 97.78% coverage
+- **13/14 modules complete** (P0 + P1 + P2 + P3)
 
 ### v0.4.0 (2026-01-31)
 

@@ -39,6 +39,13 @@
 //! | [`agents`] | Agent workflows, memory, tools | `hf_gtc.agents` |
 //! | [`safety`] | Guardrails, privacy, watermarking | `hf_gtc.safety` |
 //!
+//! ## P3 (Audio, Multimodal)
+//!
+//! | Module | Purpose | Python Equivalent |
+//! |--------|---------|-------------------|
+//! | [`audio`] | Speech recognition, audio features | `hf_gtc.audio` |
+//! | [`multimodal`] | Vision, document processing | `hf_gtc.multimodal` |
+//!
 //! # Quick Start
 //!
 //! ```rust
@@ -49,6 +56,8 @@
 //! use batuta_ground_truth_mlops_corpus::rag::{ChunkConfig, RagConfig};
 //! use batuta_ground_truth_mlops_corpus::agents::{AgentConfig, ToolDefinition};
 //! use batuta_ground_truth_mlops_corpus::safety::{ContentFilterConfig, PrivacyConfig};
+//! use batuta_ground_truth_mlops_corpus::audio::{AudioConfig, SpeechConfig};
+//! use batuta_ground_truth_mlops_corpus::multimodal::{VisionConfig, DocumentConfig};
 //!
 //! // Tokenization
 //! let tokenizer = Tokenizer::new(TokenizerConfig::default());
@@ -86,6 +95,17 @@
 //! let privacy = PrivacyConfig::new().threshold(0.8);
 //! assert!(filter.validate().is_ok());
 //! assert!(privacy.validate().is_ok());
+//!
+//! // Audio processing (Whisper-style)
+//! let audio = AudioConfig::whisper().n_mels(80).sample_rate(16000);
+//! let speech = SpeechConfig::new().timestamps(true);
+//! assert_eq!(audio.n_mels, 80);
+//!
+//! // Multimodal (vision + document)
+//! let vision = VisionConfig::clip().size(224).normalize(true);
+//! let doc = DocumentConfig::new().ocr_enabled(true);
+//! assert_eq!(vision.size, 224);
+//! assert!(doc.ocr_enabled);
 //! ```
 
 #![warn(missing_docs)]
@@ -107,6 +127,10 @@ pub mod rag;
 // P2: Agents, Safety
 pub mod agents;
 pub mod safety;
+
+// P3: Audio, Multimodal
+pub mod audio;
+pub mod multimodal;
 
 /// Common error types for the corpus
 pub mod error {
@@ -183,6 +207,19 @@ mod tests {
         let _ = safety::ContentCategory::default();
         let _ = safety::PiiType::default();
         let _ = safety::WatermarkType::default();
+    }
+
+    #[test]
+    fn test_p3_module_exports() {
+        // Verify P3 modules are accessible
+        let _ = audio::FeatureType::default();
+        let _ = audio::AudioConfig::default();
+        let _ = audio::SpeechModel::default();
+        let _ = audio::SpeechConfig::default();
+        let _ = multimodal::ImageFormat::default();
+        let _ = multimodal::VisionConfig::default();
+        let _ = multimodal::DocumentType::default();
+        let _ = multimodal::DocumentConfig::default();
     }
 
     #[test]
