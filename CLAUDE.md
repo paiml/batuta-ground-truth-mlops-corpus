@@ -110,3 +110,7 @@ batuta oracle --rag-stats
 ```
 
 The RAG index includes this corpus alongside Python ground truth, enabling cross-language pattern discovery.
+
+Index auto-updates via post-commit hooks and `ora-fresh` on shell login.
+To manually check freshness: `ora-fresh`
+To force full reindex: `batuta oracle --rag-index --force`
